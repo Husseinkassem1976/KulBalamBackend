@@ -8,3 +8,16 @@ pydantic
 python-multipart
 python-jose
 websockets
+fastapi
+passlib
+uvicorn
+sqlalchemy
+bcrypt
+python-jose
+python-multipart
+aiofiles
+requests
+pytest
+httpx
+# pip install -r requirements.txt
+#openssl rand -hex 32 to create random ssl form Oauth2

@@ -5,6 +5,9 @@ from db.database import get_db
 from db import db_post, db_user, db_post_images
 from auth.oauth2 import get_current_user
 from datetime import datetime
+from db import db_post_likes
+from pydantic import BaseModel
+
 
 router = APIRouter(
     tags=['userwall']
@@ -39,8 +42,8 @@ def posts(db: Session = Depends(get_db)):
 
 
 #get spesific post
-@router.get('/posts/{id}') #, response_model=PostDisplay)
-def get_post(id:int, db:Session = Depends(get_db)): #secure end-point #token: str = Depends(oauth2_scheme)
+@router.get('/posts/{id}/public')
+def get_post_public(id:int, db:Session = Depends(get_db)):
     return {
         'data': db_post.get_post(db,id)
     }
@@ -58,8 +61,6 @@ def update_post(id: int, request: PostUpdate, db: Session = Depends(get_db), cur
     
     return post
 
-
-#Delete Post
 @router.delete('/posts/{id}')
 def delete_post(id:int, db:Session = Depends(get_db)):
     return db_post.delete_post(db, id)
@@ -74,5 +75,31 @@ def delete_image(id:int, db:Session = Depends(get_db)):
     return db_post_images.delete_post_image(db, id)
 
 
+@router.post('/posts/{id}/like')
+def like_post(id:int, db:Session = Depends(get_db), current_user:UserBase = Depends(get_current_user)):
+    return db_post_likes.like_post(db, id, current_user.id)
 
+@router.delete("/posts/{post_id}/unlike")
+def unlike_post(post_id: int, db: Session = Depends(get_db), current_user: UserBase = Depends(get_current_user)):
+    return db_post_likes.unlike_post(db, post_id, current_user.id)
 
+class PostWrapper(BaseModel):
+    data: PostDisplay
+
+@router.get('/posts/{id}', response_model=PostWrapper)
+def read_post(id: int, db: Session = Depends(get_db), current_user: UserBase = Depends(get_current_user)):
+    data = db_post_likes.get_post_with_likes(db, id, current_user.id)
+    post = data["post"]
+
+    return PostWrapper(
+    data=PostDisplay(
+        id=post.id,
+        content=post.content,
+        user=post.user,
+        user_id=post.user_id,
+        images=post.images,
+        timestamp=post.timestamp,
+        liked_count=data["liked_count"],
+        has_liked=data["has_liked"]
+    )
+)

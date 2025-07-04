@@ -74,7 +74,8 @@ class PostBase(BaseModel): #what we recieve from the user when we are creating p
     content: str
     user_id : int
     username: str
-    timestamp: datetime
+    timestamp: datetime    
+
 
 class ImageInPost (BaseModel):
     file_path: str
@@ -82,13 +83,15 @@ class ImageInPost (BaseModel):
     class Config():
         from_attributes = True
 
-class  PostDisplay(BaseModel): #a data structure to send to the user when we are creating post
+class  PostDisplay(BaseModel): 
     id: int
     content: str
     user: User
     user_id : int
     images: List[ImageInPost] = []
     timestamp: datetime
+    liked_count: int
+    has_liked: Optional[bool] = False
     class Config(): #convert instances of ORM models(db models) into dictionaries whrn serializing the data.
         from_attributes = True
 
