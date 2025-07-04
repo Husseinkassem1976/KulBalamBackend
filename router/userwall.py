@@ -83,16 +83,13 @@ def like_post(id:int, db:Session = Depends(get_db), current_user:UserBase = Depe
 def unlike_post(post_id: int, db: Session = Depends(get_db), current_user: UserBase = Depends(get_current_user)):
     return db_post_likes.unlike_post(db, post_id, current_user.id)
 
-class PostWrapper(BaseModel):
-    data: PostDisplay
 
-@router.get('/posts/{id}', response_model=PostWrapper)
+@router.get('/posts/{id}', response_model=PostDisplay)
 def read_post(id: int, db: Session = Depends(get_db), current_user: UserBase = Depends(get_current_user)):
     data = db_post_likes.get_post_with_likes(db, id, current_user.id)
     post = data["post"]
 
-    return PostWrapper(
-    data=PostDisplay(
+    return PostDisplay(
         id=post.id,
         content=post.content,
         user=post.user,
@@ -102,4 +99,3 @@ def read_post(id: int, db: Session = Depends(get_db), current_user: UserBase = D
         liked_count=data["liked_count"],
         has_liked=data["has_liked"]
     )
-)
